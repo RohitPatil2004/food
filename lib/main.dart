@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:food/screens/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'services/theme_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'screens/login_screen.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     MultiProvider(
       providers: [
@@ -30,6 +38,7 @@ class MyApp extends StatelessWidget {
           color: Colors.deepOrange,
           elevation: 0,
         ),
+        textTheme: themeService.textTheme,
       ),
       darkTheme: ThemeData(
         primarySwatch: Colors.orange,
@@ -38,10 +47,33 @@ class MyApp extends StatelessWidget {
           color: Colors.grey[900],
           elevation: 0,
         ),
+        textTheme: themeService.textTheme,
       ),
       themeMode: themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: const HomeScreen(),
+      home: AuthenticationWrapper(),
       debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class AuthenticationWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.active) {
+          final user = snapshot.data;
+          if (user == null) {
+            return const LoginScreen();
+          }
+          return const HomeScreen();
+        } else {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+      },
     );
   }
 }

@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+  import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/theme_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -86,7 +87,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ],
-              ),
+              ),  
             ),
             // Reset Button
             Padding(
@@ -152,6 +153,24 @@ class SettingsScreen extends StatelessWidget {
           ],
         ),
       ),
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.logout),
+              label: const Text('Logout'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange,
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () async {
+                // Perform logout
+                await FirebaseAuth.instance.signOut();
+              },
+            ),
+          ),
     );
   }
 }

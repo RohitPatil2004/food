@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/recipe_service.dart';
 import 'youtube_video.dart';
+import '../services/bookmark_service.dart';
 
 class RecipeDetailsScreen extends StatefulWidget {
   final int recipeId;
@@ -22,12 +23,38 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
   late Future<Map<String, dynamic>> _recipeDetails;
   String? _youtubeVideoId;
   bool _isLoadingVideo = false;
+  bool _isBookmarked = false;
 
   @override
   void initState() {
     super.initState();
     _recipeDetails = RecipeService.getRecipeDetails(widget.recipeId);
     _fetchYoutubeVideo();
+    _checkBookmark();
+  }
+
+  Future<void> _checkBookmark() async {
+    final bookmarked = await BookmarkService.isBookmarked(widget.recipeId);
+    setState(() {
+      _isBookmarked = bookmarked;
+    });
+  }
+
+  Future<void> _toggleBookmark(Map<String, dynamic> recipe) async {
+    if (_isBookmarked) {
+      await BookmarkService.removeBookmark(widget.recipeId);
+    } else {
+      // Save minimal recipe info for bookmark
+      final bookmarkData = {
+        'id': widget.recipeId,
+        'title': widget.recipeTitle,
+        'image': recipe['image'],
+      };
+      await BookmarkService.addBookmark(bookmarkData);
+    }
+    setState(() {
+      _isBookmarked = !_isBookmarked;
+    });
   }
 
   Future<void> _fetchYoutubeVideo() async {
@@ -68,6 +95,25 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
             bottom: Radius.circular(20),
           ),
         ),
+        actions: [
+          FutureBuilder<Map<String, dynamic>>(
+            future: _recipeDetails,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final recipe = snapshot.data!;
+                return IconButton(
+                  icon: Icon(
+                    _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => _toggleBookmark(recipe),
+                );
+              } else {
+                return Container();
+              }
+            },
+          ),
+        ],
       ),
       floatingActionButton: _youtubeVideoId != null
           ? FloatingActionButton(
