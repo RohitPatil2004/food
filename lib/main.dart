@@ -38,7 +38,6 @@ class MyApp extends StatelessWidget {
           color: Colors.deepOrange,
           elevation: 0,
         ),
-        textTheme: themeService.textTheme,
       ),
       darkTheme: ThemeData(
         primarySwatch: Colors.orange,
@@ -47,7 +46,6 @@ class MyApp extends StatelessWidget {
           color: Colors.grey[900],
           elevation: 0,
         ),
-        textTheme: themeService.textTheme,
       ),
       themeMode: themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: AuthenticationWrapper(),

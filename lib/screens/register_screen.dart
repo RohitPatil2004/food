@@ -179,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: const Text('Register', style: TextStyle(fontSize: 18)),
+                      child: const Text('Get Started', style: TextStyle(fontSize: 18)),
                     ),
               const SizedBox(height: 16),
               TextButton(

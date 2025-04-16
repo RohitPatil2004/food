@@ -33,6 +33,11 @@ class _LoginScreenState extends State<LoginScreen> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
+        }
       } on FirebaseAuthException catch (e) {
         setState(() {
           _errorMessage = e.message;
