@@ -118,6 +118,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 12),
               ],
+              Text(
+                'Taste Trial',
+              style: TextStyle(fontSize: 24, color: Colors.blue),
+                  textAlign: TextAlign.center,),
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(

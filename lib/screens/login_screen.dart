@@ -28,27 +28,66 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorMessage = null;
     });
 
-      try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
-        if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const HomeScreen()),
-          );
-        }
-      } on FirebaseAuthException catch (e) {
-        setState(() {
-          _errorMessage = e.message;
-        });
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
       }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _resetPassword() async {
+    String email = _emailController.text.trim();
+    if (email.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your email';
+      });
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      _showDialog('Password Reset', 'A password reset link has been sent to your email.');
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message;
+      });
+    }
+  }
+
+  void _showDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   String? _validateEmail(String? value) {
@@ -93,72 +132,86 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Login')),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical:  32.0),
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (_errorMessage != null) ...[
-                Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-              ],
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  prefixIcon: const Icon(Icons.email),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                validator: _validateEmail,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_errorMessage != null) ...[
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                   ),
+                  const SizedBox(height: 12),
+                ],
+                Text(
+                  'Taste Trial',
+                  style: TextStyle(fontSize: 24, color: Colors.blue),
+                  textAlign: TextAlign.center, // Center the text
                 ),
-                obscureText: _obscurePassword,
-                validator: _validatePassword,
-              ),
-              const SizedBox(height: 24),
-              _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : ElevatedButton(
-                      onPressed: _signIn,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    prefixIcon: const Icon(Icons.email),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: _validateEmail,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    prefixIcon: const Icon(Icons.lock),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
                       ),
-                      child: const Text('Login', style: TextStyle(fontSize: 18)),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
-              const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                  );
-                },
-                child: const Text('Don\'t have an account? Register here'),
-              ),
-            ],
+                  ),
+                  obscureText: _obscurePassword,
+                  validator: _validatePassword,
+                ),
+                const SizedBox(height: 24),
+                _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                        onPressed: _signIn,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('Login', style: TextStyle(fontSize: 18)),
+                      ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                    );
+                  },
+                  child: const Text('Don\'t have an account? Register here'),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    _resetPassword();
+                  },
+                  child: const Text('Forgot Password?'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:food/screens/home_screen.dart';
+import 'screens/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'services/theme_service.dart';
 import 'package:firebase_core/firebase_core.dart';

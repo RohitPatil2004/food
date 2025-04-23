@@ -143,7 +143,7 @@ class SettingsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'Food App v1.0.0\n©️ 2025 Food App Inc.',
+                'TASTE TRIAL v1.0.0\n©️ 2025 Food App Inc.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.grey[600],
@@ -180,10 +180,14 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showUserInfoDialog(BuildContext context, User? user) {
+  void _showUserInfoDialog(BuildContext context, User? user) async {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
     bool _obscurePassword = true;
+
+    // Fetch user name from Firestore
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('ids').doc(user?.uid).get();
+    String userName = userDoc['name'] ?? '';
 
     showDialog(
       context: context,
@@ -202,7 +206,7 @@ class SettingsScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min, // Adjust size to fit content
               children: [
                 TextField(
-                  controller: nameController,
+                  controller: nameController..text = userName, // Set the fetched name
                   decoration: InputDecoration(
                     labelText: 'Name',
                     labelStyle: TextStyle(color: Colors.deepOrange),
@@ -291,7 +295,7 @@ class SettingsScreen extends StatelessWidget {
                           'email': user?.email,
                         }, SetOptions(merge: true));
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('User  info updated')),
+                      SnackBar(content: Text('User info updated')),
                     );
                     Navigator.of(context).pop();
                   } catch (e) {
